@@ -1,0 +1,25 @@
+---
+- name: Deploy and Start Nginx on node-02
+  hosts: 192.168.10.102
+  become: yes
+  tasks:
+    - name: 1. Install Nginx via dnf
+      dnf:
+        name: nginx
+        state: present
+
+    - name: 2. Deploy custom index.html
+      copy:
+        content: "<h1>Deployed by Ansible Playbook on node-02!</h1>\n"
+        dest: /usr/share/nginx/html/index.html
+        mode: '0644'
+
+    - name: 3. Start and enable Nginx service
+      systemd:
+        name: nginx
+        state: started
+        enabled: yes
+
+    - name: 4. Allow HTTP port 80 in firewalld
+      shell: firewall-cmd --add-port=80/tcp --permanent && firewall-cmd --reload
+      ignore_errors: yes
